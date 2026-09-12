@@ -1,0 +1,27 @@
+{
+  "name": "bank-ledger-api",
+  "version": "1.0.0",
+  "description": "A simple banking transaction API for learning Node.js, Express, MongoDB, and JWT.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "banking",
+    "express",
+    "mongodb",
+    "jwt"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.8.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
