@@ -1,27 +1,53 @@
 const jwt = require('jsonwebtoken');
+
 const User = require('../models/User');
+
 const AppError = require('../utils/AppError');
+
 const asyncHandler = require('../utils/asyncHandler');
 
 function createToken(userId) {
-  return jwt.sign({ id: String(userId) }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '1d',
-  });
+  return jwt.sign(
+    { id: String(userId) },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN || '1d',
+    }
+  );
 }
 
 exports.register = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body || {};
 
   if (!name || !email || !password) {
-    throw new AppError('Name, email, and password are required', 400);
+    throw new AppError(
+      'Name, email, and password are required',
+      400
+    );
   }
 
-  const existingUser = await User.findOne({ email });
+  const normalizedEmail = email.trim().toLowerCase();
+
+  if (password.length < 6) {
+    throw new AppError(
+      'Password must be at least 6 characters',
+      400
+    );
+  }
+
+  const existingUser = await User.findOne({
+    email: normalizedEmail,
+  });
+
   if (existingUser) {
     throw new AppError('Email already registered', 409);
   }
 
-  const user = await User.create({ name, email, password });
+  const user = await User.create({
+    name: name.trim(),
+    email: normalizedEmail,
+    password,
+  });
 
   res.status(201).json({
     success: true,
@@ -41,12 +67,23 @@ exports.login = asyncHandler(async (req, res) => {
   const { email, password } = req.body || {};
 
   if (!email || !password) {
-    throw new AppError('Email and password are required', 400);
+    throw new AppError(
+      'Email and password are required',
+      400
+    );
   }
 
-  const user = await User.findOne({ email }).select('+password');
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const user = await User.findOne({
+    email: normalizedEmail,
+  }).select('+password');
+
   if (!user || !(await user.comparePassword(password))) {
-    throw new AppError('Invalid email or password', 401);
+    throw new AppError(
+      'Invalid email or password',
+      401
+    );
   }
 
   res.status(200).json({
