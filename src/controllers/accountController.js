@@ -146,6 +146,10 @@ exports.getTransactions = asyncHandler(async (req, res) => {
 
   const { type } = req.query;
 
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
+  const skip = (page - 1) * limit;
+
   const filter = {
     $or: [
       { fromAccount: account._id },
@@ -167,11 +171,22 @@ exports.getTransactions = asyncHandler(async (req, res) => {
   }
 
   const transactions = await Transaction.find(filter)
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Transaction.countDocuments(filter);
 
   res.status(200).json({
     success: true,
-    count: transactions.length,
-    data: { transactions },
+    data: {
+      transactions,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    },
   });
 });
