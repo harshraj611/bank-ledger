@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Account = require('../models/Account');
 const Transaction = require('../models/Transaction');
 const AppError = require('../utils/AppError');
@@ -84,6 +85,9 @@ exports.transfer = asyncHandler(async (req, res) => {
 
   if (!toAccountId) {
     throw new AppError('toAccountId is required', 400);
+  }
+  if (!mongoose.Types.ObjectId.isValid(toAccountId)) {
+    throw new AppError('Invalid destination account ID', 400);
   }
 
   if (toAccountId.toString() === req.params.accountId.toString()) {
