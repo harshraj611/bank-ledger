@@ -11,7 +11,15 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 
   const token = authHeader.split(' ')[1];
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  let decoded;
+
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    throw new AppError('Invalid or expired token', 401);
+  }
+
   const user = await User.findById(decoded.id);
 
   if (!user) {
@@ -19,6 +27,7 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 
   req.user = user;
+
   next();
 });
 
