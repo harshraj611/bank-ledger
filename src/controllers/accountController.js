@@ -139,11 +139,35 @@ exports.transfer = asyncHandler(async (req, res) => {
 });
 
 exports.getTransactions = asyncHandler(async (req, res) => {
-  const account = await getOwnedAccount(req.params.accountId, req.user._id);
+  const account = await getOwnedAccount(
+    req.params.accountId,
+    req.user._id
+  );
 
-  const transactions = await Transaction.find({
-    $or: [{ fromAccount: account._id }, { toAccount: account._id }],
-  }).sort({ createdAt: -1 });
+  const { type } = req.query;
+
+  const filter = {
+    $or: [
+      { fromAccount: account._id },
+      { toAccount: account._id },
+    ],
+  };
+
+  if (type) {
+    const normalizedType = type.toLowerCase();
+
+    if (!['deposit', 'transfer'].includes(normalizedType)) {
+      throw new AppError(
+        'Type must be either deposit or transfer',
+        400
+      );
+    }
+
+    filter.type = normalizedType;
+  }
+
+  const transactions = await Transaction.find(filter)
+    .sort({ createdAt: -1 });
 
   res.status(200).json({
     success: true,
