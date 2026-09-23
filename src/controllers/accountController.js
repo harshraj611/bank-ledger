@@ -81,6 +81,11 @@ exports.deposit = asyncHandler(async (req, res) => {
 
 exports.transfer = asyncHandler(async (req, res) => {
   const { amount, toAccountId, description } = req.body || {};
+
+  if (amount === undefined || amount === null) {
+    throw new AppError('Amount is required', 400);
+  }
+
   const parsedAmount = parseAmount(amount);
 
   if (!toAccountId) {
