@@ -134,15 +134,17 @@ exports.transfer = asyncHandler(async (req, res) => {
     success: true,
     message: 'Transfer successful',
     data: {
-      fromAccount: {
-        id: sender._id,
+      transaction,
+      sender: {
+        accountId: sender._id,
+        accountNumber: sender.accountNumber,
         balance: sender.balance,
       },
-      toAccount: {
-        id: receiver._id,
+      receiver: {
+        accountId: receiver._id,
         accountNumber: receiver.accountNumber,
+        balance: receiver.balance,
       },
-      transaction,
     },
   });
 });
